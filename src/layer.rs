@@ -27,3 +27,46 @@ struct Layer {
     /// represent each nodes' biases in the current layer.
     biases: Vec<GlobalNNFloatType>
 }
+
+/* Method implementations */
+impl Layer {
+    /// Layer constructor
+    pub fn new(num_nodes_in: usize, num_nodes_out: usize) -> Self {
+        Self {
+            num_nodes_in,
+            num_nodes_out,
+            weights: vec![vec![0.;num_nodes_out];num_nodes_in],
+            biases: vec![0.;num_nodes_out]
+        }
+    }
+
+    /// Calculate outputs of layer
+    pub fn calculate_outputs(&self, inputs: Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
+        let mut weighted_inputs:Vec<GlobalNNFloatType> = Vec::with_capacity(self.num_nodes_out);
+
+        /* Iterate over the *Current* layer */
+        for node_out in 0..self.num_nodes_out {
+
+            /* Grab the bias which the current node possesses */
+            let mut weighted_input = self.biases[node_out];
+
+            /* Iterate over ingoing nodes */
+            for node_in in 0..self.num_nodes_in {
+
+                /* 
+                    Here we caculate the output value of each node.
+                    The `weighted_input` variable is increased by 
+                    all nodes in the previous layers multiplied by
+                    their respective weights (aka influence on current)
+                */
+                weighted_input += inputs[node_in] * self.weights[node_in][node_out];
+            };
+
+            /* Set the value inside of the `weighted_inputs` vec we created */
+            weighted_inputs[node_out] = weighted_input;
+        }
+
+        /* Return */
+        weighted_inputs
+    }
+}
