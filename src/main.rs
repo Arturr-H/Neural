@@ -6,8 +6,8 @@
 )]
 
 /* Modules */
-mod layer;
-mod network;
+pub mod layer;
+pub mod network;
 
 /* Imports */
 
