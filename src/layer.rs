@@ -7,7 +7,7 @@
 pub type GlobalNNFloatType = f64;
 
 /* Main */
-struct Layer {
+pub struct Layer {
     // TODO: Change usize to smaller like u8 / u16 for performanmce
     /// `num_nodes_in` is the amount of nodes in the
     /// __*previous*__ layer
@@ -69,4 +69,10 @@ impl Layer {
         /* Return */
         weighted_inputs
     }
+
+    /* GETTERS */
+    pub fn num_nodes_in(&self) -> usize { self.num_nodes_in }
+    pub fn num_nodes_out(&self) -> usize { self.num_nodes_out }
+    pub fn weights(&self) -> &Vec<Vec<f64>> { &self.weights }
+    pub fn biases(&self) -> &Vec<f64> { &self.biases }
 }
