@@ -15,7 +15,7 @@ impl Network {
     /// ## Example
     /// ```
     /// use neural_network::network::Network;
-    /// let nn = Network::new([2, 6, 8, 6, 2]);
+    /// let nn = Network::new(&[2, 6, 8, 6, 2]);
     /// ```
     pub fn new(layer_sizes: &[usize]) -> Self {
         let size = layer_sizes.len();
@@ -27,9 +27,9 @@ impl Network {
         Network { layers }
     }
 
-    /* Calculate outputs - from the beginning we pass
-        inputs through the first layer - then the
-        outputs of that layer to next layer and so on */
+    /// Calculate outputs - from the beginning we pass
+    /// inputs through the first layer - then the
+    /// outputs of that layer to next layer and so on
     pub fn calculate_outputs(&self, mut inputs: Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
         for layer in &self.layers {
             inputs = layer.calculate_outputs(inputs);
@@ -38,8 +38,8 @@ impl Network {
         return inputs
     }
 
-    /* Calculates outputs and classifies which output 
-        neuron has highest value (index of) */
+    /// Calculates outputs and classifies which output 
+    /// neuron has highest value (index of)
     pub fn classify(&self, inputs: Vec<GlobalNNFloatType>) -> usize {
         let outputs = self.calculate_outputs(inputs);
         let (mut a, mut b):(usize, GlobalNNFloatType) = (0, 0.);
