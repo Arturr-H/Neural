@@ -8,8 +8,11 @@
 /* Modules */
 pub mod layer;
 pub mod network;
+pub mod activations;
 
 /* Imports */
 
 /* Main */
-fn main() {}
+fn main() {
+    network::Network::new(&[1, 2, 3, 4]);
+}
