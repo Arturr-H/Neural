@@ -1,4 +1,4 @@
-/* Activation functions */
+pub type Activation = fn(GlobalNNFloatType) -> GlobalNNFloatType;
 
 /// Step
 pub fn step(input: GlobalNNFloatType) -> GlobalNNFloatType {
