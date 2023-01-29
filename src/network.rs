@@ -49,4 +49,7 @@ impl Network {
 
         a
     }
+
+    /* Getters */
+    pub fn layers(&self) -> &Vec<Layer> { &self.layers }
 }
