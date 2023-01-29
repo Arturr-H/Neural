@@ -75,6 +75,12 @@ impl Layer {
         activations
     }
 
+    /// Node cost of a single neuron. Compares it to expected
+    pub fn node_cost(neuron: GlobalNNFloatType, expected: GlobalNNFloatType) -> GlobalNNFloatType {
+        let err = neuron - expected;
+        err * err
+    }
+
     /* GETTERS */
     pub fn num_nodes_in(&self) -> usize { self.num_nodes_in }
     pub fn num_nodes_out(&self) -> usize { self.num_nodes_out }
