@@ -1,4 +1,5 @@
 /* Imports */
+use crate::activations::{ self, Activation };
 
 /// `f32` (single precision) is faster and uses less memory
 /// than f64 (double precision), but f64 has higher precision
@@ -25,7 +26,10 @@ pub struct Layer {
 
     /// The biases are a one-dimensional vector, because the biases
     /// represent each nodes' biases in the current layer.
-    biases: Vec<GlobalNNFloatType>
+    biases: Vec<GlobalNNFloatType>,
+
+    /// The activation function represented by this layer
+    activation: Activation
 }
 
 /* Method implementations */
@@ -36,13 +40,14 @@ impl Layer {
             num_nodes_in,
             num_nodes_out,
             weights: vec![vec![0.;num_nodes_out];num_nodes_in],
-            biases: vec![0.;num_nodes_out]
+            biases: vec![0.;num_nodes_out],
+            activation: activations::step
         }
     }
 
     /// Calculate outputs of layer
     pub fn calculate_outputs(&self, inputs: Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
-        let mut weighted_inputs:Vec<GlobalNNFloatType> = Vec::with_capacity(self.num_nodes_out);
+        let mut activations:Vec<GlobalNNFloatType> = Vec::with_capacity(self.num_nodes_out);
 
         /* Iterate over the *Current* layer */
         for node_out in 0..self.num_nodes_out {
@@ -62,12 +67,12 @@ impl Layer {
                 weighted_input += inputs[node_in] * self.weights[node_in][node_out];
             };
 
-            /* Set the value inside of the `weighted_inputs` vec we created */
-            weighted_inputs[node_out] = weighted_input;
+            /* Set the value inside of the `activations` vec we created */
+            activations[node_out] = self.activation()(weighted_input);
         }
 
         /* Return */
-        weighted_inputs
+        activations
     }
 
     /* GETTERS */
@@ -75,4 +80,5 @@ impl Layer {
     pub fn num_nodes_out(&self) -> usize { self.num_nodes_out }
     pub fn weights(&self) -> &Vec<Vec<f64>> { &self.weights }
     pub fn biases(&self) -> &Vec<f64> { &self.biases }
+    pub fn activation(&self) -> Activation { self.activation }
 }
