@@ -20,8 +20,13 @@ impl Network {
     pub fn new(layer_sizes: &[usize]) -> Self {
         let size = layer_sizes.len();
         let mut layers:Vec<Layer> = Vec::with_capacity(size);
-        for index in 0..&size-1 {
-            layers.push(Layer::new(layer_sizes[index], layer_sizes[index+1]));
+        for index in 0..size {
+
+            /* We can't grab the previous input nodes if we are at the first index */
+            let into_prev;
+            if index == 0 { into_prev = 0 }
+            else { into_prev = layer_sizes[index - 1] }
+            layers.push(Layer::new(into_prev, layer_sizes[index]));
         };
 
         Network { layers }
