@@ -120,6 +120,18 @@ impl Layer {
         self
     }
 
+    /// Update all weights and biases depending on the cost gradients.
+    /// (Gradient descent)
+    pub fn apply_gradients(&mut self, learn_rate: f64) -> () {
+        for node_out in 0..self.num_nodes_out {
+            self.biases[node_out] -= self.cost_gradient_biases[node_out];
+            
+            for node_in in 0..self.num_nodes_in {
+                self.weights[node_in][node_out] -= self.cost_gradient_weights[node_in][node_out] * learn_rate;
+            };
+        };
+    }
+
     /* [GETTERS] General */
     pub fn num_nodes_in(&self) -> usize { self.num_nodes_in }
     pub fn num_nodes_out(&self) -> usize { self.num_nodes_out }
