@@ -1,5 +1,6 @@
 /* Imports */
 use crate::{ layer::{ Layer, GlobalNNFloatType }, datapoint::Datapoint };
+use std::fmt::Display;
 
 /* Main */
 pub struct Network {
@@ -84,4 +85,15 @@ impl Network {
 
     /* Getters */
     pub fn layers(&self) -> &Vec<Layer> { &self.layers }
+}
+
+/* Debug impl */
+impl Display for Network {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let layers = self.layers().iter().map(|e| format!("{e}")).collect::<Vec<String>>().join("\n  ");
+        write!(f,
+            "\n#################### NETWORK START{}\n#################### NETWORK END",
+            layers
+        )
+    }
 }
