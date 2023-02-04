@@ -84,7 +84,7 @@ impl Layer {
     /* GETTERS */
     pub fn num_nodes_in(&self) -> usize { self.num_nodes_in }
     pub fn num_nodes_out(&self) -> usize { self.num_nodes_out }
-    pub fn weights(&self) -> &Vec<Vec<f64>> { &self.weights }
-    pub fn biases(&self) -> &Vec<f64> { &self.biases }
+    pub fn weights(&self) -> &Vec<Vec<GlobalNNFloatType>> { &self.weights }
+    pub fn biases(&self) -> &Vec<GlobalNNFloatType> { &self.biases }
     pub fn activation(&self) -> Activation { self.activation }
 }
