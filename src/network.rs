@@ -1,5 +1,5 @@
 /* Imports */
-use crate::layer::{ Layer, GlobalNNFloatType };
+use crate::{ layer::{ Layer, GlobalNNFloatType }, datapoint::Datapoint };
 
 /* Main */
 pub struct Network {
@@ -53,6 +53,33 @@ impl Network {
         };
 
         a
+    }
+
+    /// The total cost of a *single* `DataPoint`
+    /// Calculates the output of the `Network` once provided with the
+    /// `inputs` field from `DataPoint`. Iterates over each output neuron
+    /// and compares it to every item in the `expected` field of `DataPoint`
+    pub fn cost_single(&self, datapoint: Datapoint) -> GlobalNNFloatType {
+        let recieved_outputs = self.calculate_outputs(datapoint.inputs);
+        let mut cost:GlobalNNFloatType = 0.;
+
+        for (index, recv) in recieved_outputs.iter().enumerate() {
+            cost += Layer::node_cost(*recv, datapoint.expected[index]);
+        }
+
+        cost
+    }
+
+    /// The total cost of *multiple* `DataPoint`s
+    pub fn cost_multiple(&self, datapoints: Vec<Datapoint>) -> GlobalNNFloatType {
+        let mut total_cost:GlobalNNFloatType = 0.;
+        let datapoints_len = datapoints.len();
+
+        for datapoint in datapoints {
+            total_cost += self.cost_single(datapoint);
+        }
+
+        total_cost / datapoints_len as GlobalNNFloatType
     }
 
     /* Getters */
