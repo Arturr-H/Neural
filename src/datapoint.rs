@@ -4,10 +4,10 @@ use crate::layer::GlobalNNFloatType;
 /* Main */
 pub struct Datapoint {
     /// Aka input layer
-    inputs: Vec<GlobalNNFloatType>,
+    pub inputs: Vec<GlobalNNFloatType>,
 
     /// Aka output layer
-    expected: Vec<GlobalNNFloatType>,
+    pub expected: Vec<GlobalNNFloatType>,
 }
 
 /* Method implementations */
