@@ -1,8 +1,10 @@
 [package]
 name = "neural-network"
+description = "Trying to create a neural network from scratch!"
+license = "MIT"
+authors = ["Artur <artur.h.0427@gmail.com>"]
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+rand = "0.8.5"
