@@ -47,7 +47,7 @@ impl Layer {
 
     /// Calculate outputs of layer
     pub fn calculate_outputs(&self, inputs: Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
-        let mut activations:Vec<GlobalNNFloatType> = Vec::with_capacity(self.num_nodes_out);
+        let mut activations:Vec<GlobalNNFloatType> = vec![0.; self.num_nodes_out];
 
         /* Iterate over the *Current* layer */
         for node_out in 0..self.num_nodes_out {
