@@ -1,5 +1,7 @@
 /* Imports */
 use crate::activations::{ self, Activation };
+use rand::{ self, Rng };
+use std::fmt::Display;
 
 /// `f32` (single precision) is faster and uses less memory
 /// than f64 (double precision), but f64 has higher precision
@@ -62,6 +64,9 @@ impl Layer {
 
             activation: activations::step
         }
+        
+        /* Initialize fields */
+        .initialize_weights()
     }
 
     /// Calculate outputs of layer
@@ -98,6 +103,21 @@ impl Layer {
     pub fn node_cost(neuron: GlobalNNFloatType, expected: GlobalNNFloatType) -> GlobalNNFloatType {
         let err = neuron - expected;
         err * err
+    }
+
+
+    /// Initialize weights
+    fn initialize_weights(mut self) -> Self {
+        let mut rng = rand::thread_rng();
+        
+        for node_in in 0..self.num_nodes_in {
+            for node_out in 0..self.num_nodes_out {
+                let v = rng.gen_range((-1.0)..(1.0));
+                self.weights[node_in][node_out] = v / (self.num_nodes_in as GlobalNNFloatType).sqrt();
+            };
+        };
+
+        self
     }
 
     /* [GETTERS] General */
