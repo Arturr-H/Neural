@@ -133,3 +133,31 @@ impl Layer {
     pub fn cost_gradient_biases(&self) -> &Vec<GlobalNNFloatType> { &self.cost_gradient_biases }
     pub fn cost_gradient_weights(&self) -> &Vec<Vec<GlobalNNFloatType>> { &self.cost_gradient_weights }
 }
+
+/* Debug implementation */
+impl Display for Layer {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        /* Write to formatter */
+        let mut string = format!("\n[Layer {}:{}]", self.num_nodes_in, self.num_nodes_out);
+
+        /* Write every neuron and its weights like this: bias:[weight1, weight2, ...] */
+        for node_out in 0..self.num_nodes_out {
+
+            /* Round weights and biases to three decimals */
+            string.push_str(&format!(
+                "\n    Neuron {}: bias:{:.3}, ",
+                node_out,
+                self.biases[node_out]
+            ));
+
+            string.push_str(" weights:[");
+            for node_in in 0..self.num_nodes_in {
+                string.push_str(&format!("{:.3}, ", self.weights[node_in][node_out]));
+            };
+
+            string.push_str("]");
+        };
+
+        write!(f, "{}", string)
+    }
+}
