@@ -36,9 +36,10 @@ impl Network {
     /// Calculate outputs - from the beginning we pass
     /// inputs through the first layer - then the
     /// outputs of that layer to next layer and so on
-    pub fn calculate_outputs(&self, mut inputs: Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
+    pub fn calculate_outputs(&self, inputs: &Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
+        let mut inputs:Vec<GlobalNNFloatType> = inputs.clone();
         for layer in &self.layers {
-            inputs = layer.calculate_outputs(inputs);
+            inputs = layer.calculate_outputs(&inputs);
         }
 
         return inputs
@@ -47,7 +48,7 @@ impl Network {
     /// Calculates outputs and classifies which output 
     /// neuron has highest value (index of)
     pub fn classify(&self, inputs: Vec<GlobalNNFloatType>) -> usize {
-        let outputs = self.calculate_outputs(inputs);
+        let outputs = self.calculate_outputs(&inputs);
         let (mut a, mut b):(usize, GlobalNNFloatType) = (0, 0.);
         for (index, output) in outputs.iter().enumerate() {
             if output > &b { a = index; b = *output; }
@@ -60,8 +61,8 @@ impl Network {
     /// Calculates the output of the `Network` once provided with the
     /// `inputs` field from `DataPoint`. Iterates over each output neuron
     /// and compares it to every item in the `expected` field of `DataPoint`
-    pub fn cost_single(&self, datapoint: Datapoint) -> GlobalNNFloatType {
-        let recieved_outputs = self.calculate_outputs(datapoint.inputs);
+    pub fn cost_single(&self, datapoint: &Datapoint) -> GlobalNNFloatType {
+        let recieved_outputs = self.calculate_outputs(&datapoint.inputs);
         let mut cost:GlobalNNFloatType = 0.;
 
         for (index, recv) in recieved_outputs.iter().enumerate() {
@@ -72,7 +73,7 @@ impl Network {
     }
 
     /// The total cost of *multiple* `DataPoint`s
-    pub fn cost_multiple(&self, datapoints: Vec<Datapoint>) -> GlobalNNFloatType {
+    pub fn cost_multiple(&self, datapoints: &Vec<&Datapoint>) -> GlobalNNFloatType {
         let mut total_cost:GlobalNNFloatType = 0.;
         let datapoints_len = datapoints.len();
 
@@ -81,6 +82,45 @@ impl Network {
         }
 
         total_cost / datapoints_len as GlobalNNFloatType
+    }
+
+    /// Run one iteration of gradient descent
+    pub fn learn(&mut self, training_data: Vec<&Datapoint>, learn_rate: f64) -> () {
+        const H:f64 = 0.0001;
+        let original_cost = self.cost_multiple(&training_data);
+
+        for i in 0..self.layers().len() {
+            let layer = &self.layers[i];
+            let nodes_in = layer.num_nodes_in();
+            let nodes_out = layer.num_nodes_out();
+
+            /* Calculate gradients for WEIGHTS */
+            for node_in in 0..nodes_in {
+                for node_out in 0..nodes_out {
+                    self.layers[i].weights_mut()[node_in][node_out] += H;
+                    let delta_cost = &self.cost_multiple(&training_data) - original_cost;
+                    self.layers[i].weights_mut()[node_in][node_out] -= H;
+                    self.layers[i].cost_gradient_weights_mut()[node_in][node_out] = delta_cost / H;
+                };
+            };
+
+            /* Calculate gradients for BIASES */
+            for node_out in 0..nodes_out {
+                self.layers[i].biases_mut()[node_out] += H;
+                let delta_cost = &self.cost_multiple(&training_data) - original_cost;
+                self.layers[i].biases_mut()[node_out] -= H;
+                self.layers[i].cost_gradient_biases_mut()[node_out] = delta_cost / H;
+            };
+        };
+
+        self.apply_all_gradients(learn_rate);
+    }
+
+    /// Applies gradients on all layers
+    pub fn apply_all_gradients(&mut self, learn_rate: f64) -> () {
+        for layer in self.layers.iter_mut() {
+            layer.apply_gradients(learn_rate);
+        };
     }
 
     /* Getters */
