@@ -5,7 +5,10 @@ use std::fmt::Display;
 /* Main */
 pub struct Network {
     /// Each individual layer is stored here, including output and input
-    layers: Vec<Layer>
+    layers: Vec<Layer>,
+
+    /// The cost of the current iteration
+    cost: GlobalNNFloatType
 }
 
 /* Method implementations */
@@ -30,7 +33,7 @@ impl Network {
             layers.push(Layer::new(into_prev, layer_sizes[index]));
         };
 
-        Network { layers }
+        Network { layers, cost: f64::NAN }
     }
 
     /// Calculate outputs - from the beginning we pass
@@ -73,7 +76,7 @@ impl Network {
     }
 
     /// The total cost of *multiple* `DataPoint`s
-    pub fn cost_multiple(&self, datapoints: &Vec<&Datapoint>) -> GlobalNNFloatType {
+    pub fn cost_multiple(&self, datapoints: &Vec<Datapoint>) -> GlobalNNFloatType {
         let mut total_cost:GlobalNNFloatType = 0.;
         let datapoints_len = datapoints.len();
 
@@ -85,9 +88,10 @@ impl Network {
     }
 
     /// Run one iteration of gradient descent
-    pub fn learn(&mut self, training_data: Vec<&Datapoint>, learn_rate: f64) -> () {
-        const H:f64 = 0.0001;
-        let original_cost = self.cost_multiple(&training_data);
+    pub fn learn(&mut self, training_data: &Vec<Datapoint>, learn_rate: f64) -> () {
+        const H:f64 = 0.1;
+        let original_cost = self.cost_multiple(training_data);
+        self.cost = original_cost;
 
         for i in 0..self.layers().len() {
             let layer = &self.layers[i];
@@ -98,7 +102,7 @@ impl Network {
             for node_in in 0..nodes_in {
                 for node_out in 0..nodes_out {
                     self.layers[i].weights_mut()[node_in][node_out] += H;
-                    let delta_cost = &self.cost_multiple(&training_data) - original_cost;
+                    let delta_cost = self.cost_multiple(training_data) - original_cost;
                     self.layers[i].weights_mut()[node_in][node_out] -= H;
                     self.layers[i].cost_gradient_weights_mut()[node_in][node_out] = delta_cost / H;
                 };
@@ -107,7 +111,7 @@ impl Network {
             /* Calculate gradients for BIASES */
             for node_out in 0..nodes_out {
                 self.layers[i].biases_mut()[node_out] += H;
-                let delta_cost = &self.cost_multiple(&training_data) - original_cost;
+                let delta_cost = self.cost_multiple(training_data) - original_cost;
                 self.layers[i].biases_mut()[node_out] -= H;
                 self.layers[i].cost_gradient_biases_mut()[node_out] = delta_cost / H;
             };
@@ -125,6 +129,7 @@ impl Network {
 
     /* Getters */
     pub fn layers(&self) -> &Vec<Layer> { &self.layers }
+    pub fn cost(&self) -> &GlobalNNFloatType { &self.cost }
 }
 
 /* Debug impl */
