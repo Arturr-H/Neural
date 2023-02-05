@@ -62,6 +62,7 @@ impl Layer {
             biases:               vec![0.;num_nodes_out],
             cost_gradient_biases: vec![0.;num_nodes_out],
 
+            // TODO: Change this activation
             activation: activations::step
         }
         
@@ -70,7 +71,7 @@ impl Layer {
     }
 
     /// Calculate outputs of layer
-    pub fn calculate_outputs(&self, inputs: Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
+    pub fn calculate_outputs(&self, inputs: &Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
         let mut activations:Vec<GlobalNNFloatType> = vec![0.; self.num_nodes_out];
 
         /* Iterate over the *Current* layer */
@@ -104,7 +105,6 @@ impl Layer {
         let err = neuron - expected;
         err * err
     }
-
 
     /// Initialize weights
     fn initialize_weights(mut self) -> Self {
@@ -140,10 +140,14 @@ impl Layer {
     /* [GETTERS] Weights and biases */
     pub fn weights(&self) -> &Vec<Vec<GlobalNNFloatType>> { &self.weights }
     pub fn biases(&self) -> &Vec<GlobalNNFloatType> { &self.biases }
+    pub fn weights_mut(&mut self) -> &mut Vec<Vec<GlobalNNFloatType>> { &mut self.weights }
+    pub fn biases_mut(&mut self) -> &mut Vec<GlobalNNFloatType> { &mut self.biases }
 
     /* [GETTERS] Cost gradient */
     pub fn cost_gradient_biases(&self) -> &Vec<GlobalNNFloatType> { &self.cost_gradient_biases }
     pub fn cost_gradient_weights(&self) -> &Vec<Vec<GlobalNNFloatType>> { &self.cost_gradient_weights }
+    pub fn cost_gradient_biases_mut(&mut self) -> &mut Vec<GlobalNNFloatType> { &mut self.cost_gradient_biases }
+    pub fn cost_gradient_weights_mut(&mut self) -> &mut Vec<Vec<GlobalNNFloatType>> { &mut self.cost_gradient_weights }
 }
 
 /* Debug implementation */
