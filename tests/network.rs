@@ -15,7 +15,7 @@ mod tests {
     #[test]
     fn calculate_outputs() -> () {
         let nn = Network::new(&[2, 4, 5, 2]);
-        nn.calculate_outputs(vec![1., 0.]);
+        nn.calculate_outputs(&vec![1., 0.]);
     }
 
     #[test]
