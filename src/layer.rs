@@ -63,11 +63,12 @@ impl Layer {
             cost_gradient_biases: vec![0.;num_nodes_out],
 
             // TODO: Change this activation
-            activation: activations::step
+            activation: activations::sigmoid
         }
         
         /* Initialize fields */
         .initialize_weights()
+        .initialize_biases()
     }
 
     /// Calculate outputs of layer
@@ -115,6 +116,17 @@ impl Layer {
                 let v = rng.gen_range((-1.0)..(1.0));
                 self.weights[node_in][node_out] = v / (self.num_nodes_in as GlobalNNFloatType).sqrt();
             };
+        };
+
+        self
+    }
+    /// Initialize biases
+    fn initialize_biases(mut self) -> Self {
+        let mut rng = rand::thread_rng();
+
+        for node_out in 0..self.num_nodes_out {
+            let v = rng.gen_range((-1.0)..(1.0));
+            self.biases[node_out] = v;
         };
 
         self
