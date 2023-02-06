@@ -38,7 +38,7 @@ impl Network {
 
     /// Calculate outputs - from the beginning we pass
     /// inputs through the first layer - then the
-    /// outputs of that layer to next layer and so on
+    /// outputs of that layer to next layer and so on »»»»»»»»»»»»»»»»»»»»»»»»»
     pub fn calculate_outputs(&self, inputs: &Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
         let mut inputs:Vec<GlobalNNFloatType> = inputs.clone();
         for layer in &self.layers {
@@ -88,12 +88,13 @@ impl Network {
     }
 
     /// Run one iteration of gradient descent
-    pub fn learn(&mut self, training_data: &Vec<Datapoint>, learn_rate: f64) -> () {
+    pub fn learn(&mut self, training_data: &Vec<Datapoint>, _learn_rate: f64) -> () {
         const H:f64 = 0.1;
         let original_cost = self.cost_multiple(training_data);
         self.cost = original_cost;
 
         for i in 0..self.layers().len() {
+            dbg!(i);
             let layer = &self.layers[i];
             let nodes_in = layer.num_nodes_in();
             let nodes_out = layer.num_nodes_out();
@@ -101,10 +102,10 @@ impl Network {
             /* Calculate gradients for WEIGHTS */
             for node_in in 0..nodes_in {
                 for node_out in 0..nodes_out {
-                    self.layers[i].weights_mut()[node_in][node_out] += H;
+                    *self.layers[i].get_weight_mut(node_in, node_out) += H;
                     let delta_cost = self.cost_multiple(training_data) - original_cost;
-                    self.layers[i].weights_mut()[node_in][node_out] -= H;
-                    self.layers[i].cost_gradient_weights_mut()[node_in][node_out] = delta_cost / H;
+                    *self.layers[i].get_weight_mut(node_in, node_out) -= H;
+                    *self.layers[i].get_cost_gradient_weight_mut(node_in, node_out) = delta_cost / H;
                 };
             };
 
@@ -117,16 +118,8 @@ impl Network {
             };
         };
 
-        self.apply_all_gradients(learn_rate);
+        // self.apply_all_gradients(learn_rate);
     }
-
-    /// Applies gradients on all layers
-    pub fn apply_all_gradients(&mut self, learn_rate: f64) -> () {
-        for layer in self.layers.iter_mut() {
-            layer.apply_gradients(learn_rate);
-        };
-    }
-
     /* Getters */
     pub fn layers(&self) -> &Vec<Layer> { &self.layers }
     pub fn cost(&self) -> &GlobalNNFloatType { &self.cost }
