@@ -3,3 +3,4 @@ pub mod layer;
 pub mod network;
 pub mod datapoint;
 pub mod activations;
+pub mod learndata;
