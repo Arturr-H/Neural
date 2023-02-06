@@ -1,5 +1,5 @@
 /* Imports */
-use crate::activations::{ self, Activation };
+use crate::{activations::{ self, Activation }, learndata::LayerLearnData};
 use rand::{ self, Rng };
 use std::fmt::Display;
 
@@ -74,7 +74,7 @@ impl Layer {
 
     /// Calculate outputs of layer
     pub fn calculate_outputs(&self, inputs: &Vec<GlobalNNFloatType>) -> Vec<GlobalNNFloatType> {
-        let mut activations:Vec<GlobalNNFloatType> = vec![0.; self.num_nodes_out];
+        let mut weighted_inputs:Vec<GlobalNNFloatType> = Vec::with_capacity(self.num_nodes_out());
 
         /* Iterate over the *Current* layer */
         for node_out in 0..self.num_nodes_out {
@@ -94,8 +94,14 @@ impl Layer {
                 weighted_input += inputs[node_in] * self.get_weight(node_in, node_out);
             };
 
-            /* Set the value inside of the `activations` vec we created */
-            activations[node_out] = self.activation()(weighted_input);
+            weighted_inputs.push(weighted_input);
+
+        }
+
+        /* Apply activation to all values */
+        let mut activations = Vec::with_capacity(self.num_nodes_out());
+        for output_node in 0..self.num_nodes_out() {
+            activations.push(self.activation()(&weighted_inputs, output_node));
         }
 
         /* Return */

@@ -1,6 +1,6 @@
 /* Imports */
 use crate::layer::GlobalNNFloatType;
-pub type Activation = fn(GlobalNNFloatType) -> GlobalNNFloatType;
+pub type Activation = fn(&Vec<GlobalNNFloatType>, usize) -> GlobalNNFloatType;
 
 /// Step
 pub fn step(input: GlobalNNFloatType) -> GlobalNNFloatType {
@@ -8,8 +8,12 @@ pub fn step(input: GlobalNNFloatType) -> GlobalNNFloatType {
 }
 
 /// Sigmoid
-pub fn sigmoid(input: GlobalNNFloatType) -> GlobalNNFloatType {
-    1. / (1. + (-input).exp())
+pub fn sigmoid(inputs: &Vec<GlobalNNFloatType>, index: usize) -> GlobalNNFloatType {
+    return 1.0 / (1. + (-inputs[index]).exp());
+}
+pub fn sigmoid_derivative(inputs: &Vec<GlobalNNFloatType>, index: usize) -> GlobalNNFloatType {
+    let a = sigmoid(inputs, index);
+    return a * (1. - a);
 }
 
 /// SiLU
