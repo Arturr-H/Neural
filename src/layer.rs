@@ -23,8 +23,9 @@ pub struct Layer {
     /// The weights are saved in a 2d matrix; 1st __"dimension"__
     /// is every nodes in the previous layer, and the 2nd
     /// __"dimension"__  is every weight from that node to each and
-    /// every node in the current layer
-    weights: Vec<Vec<GlobalNNFloatType>>,
+    /// every node in the current layer. It's actually stored in 1d
+    /// for performance reasons
+    weights: Vec<GlobalNNFloatType>,
 
     /// The biases are a one-dimensional vector, because the biases
     /// represent each nodes' biases in the current layer.
@@ -36,8 +37,8 @@ pub struct Layer {
     /// The cost gradient weights are a 2d matrix, responding to
     /// each and every weight in the `weights` matrix. The value
     /// is determined by how much the cost changes in response to
-    /// a change in the weight.
-    cost_gradient_weights: Vec<Vec<GlobalNNFloatType>>,
+    /// a change in the weight. Stored in 1d vector
+    cost_gradient_weights: Vec<GlobalNNFloatType>,
 
     /// The cost gradient biases is an array responding to
     /// each and every bias in the `biases` array. The value
@@ -55,8 +56,8 @@ impl Layer {
             num_nodes_out,
 
             /* Weights */
-            weights:               vec![vec![0.;num_nodes_out];num_nodes_in],
-            cost_gradient_weights: vec![vec![0.;num_nodes_out];num_nodes_in],
+            weights:               vec![0.; num_nodes_out * num_nodes_in],
+            cost_gradient_weights: vec![0.; num_nodes_out * num_nodes_in],
 
             /* Biases */
             biases:               vec![0.;num_nodes_out],
@@ -90,7 +91,7 @@ impl Layer {
                     all nodes in the previous layers multiplied by
                     their respective weights (aka influence on current)
                 */
-                weighted_input += inputs[node_in] * self.weights[node_in][node_out];
+                weighted_input += inputs[node_in] * self.get_weight(node_in, node_out);
             };
 
             /* Set the value inside of the `activations` vec we created */
@@ -100,6 +101,30 @@ impl Layer {
         /* Return */
         activations
     }
+
+    /// Get a value from the `weights` "matrix"
+	pub fn get_weight(&self, node_in: usize, node_out: usize) -> f64 {
+		let flat_index = node_out * self.num_nodes_in() + node_in;
+		self.weights[flat_index]
+	}
+
+    /// Get a mutable reference to a value in the `weights` "matrix"
+	pub fn get_weight_mut(&mut self, node_in: usize, node_out: usize) -> &mut f64 {
+		let flat_index = node_out * self.num_nodes_in() + node_in;
+		&mut self.weights[flat_index]
+	}
+
+    /// Get a value from the `cost_gradient_weights` "matrix"
+	pub fn get_cost_gradient_weight(&self, node_in: usize, node_out: usize) -> f64 {
+		let flat_index = node_out * self.num_nodes_in() + node_in;
+		self.cost_gradient_weights[flat_index]
+	}
+
+    /// Get a mutable reference to a value in the `cost_gradient_weights` "matrix"
+	pub fn get_cost_gradient_weight_mut(&mut self, node_in: usize, node_out: usize) -> &mut f64 {
+		let flat_index = node_out * self.num_nodes_in() + node_in;
+		&mut self.cost_gradient_weights[flat_index]
+	}
 
     /// Node cost of a single neuron. Compares it to expected
     pub fn node_cost(neuron: GlobalNNFloatType, expected: GlobalNNFloatType) -> GlobalNNFloatType {
@@ -114,7 +139,7 @@ impl Layer {
         for node_in in 0..self.num_nodes_in {
             for node_out in 0..self.num_nodes_out {
                 let v = rng.gen_range((-1.0)..(1.0));
-                self.weights[node_in][node_out] = v / (self.num_nodes_in as GlobalNNFloatType).sqrt();
+                *self.get_weight_mut(node_in, node_out) = v / (self.num_nodes_in as GlobalNNFloatType).sqrt();
             };
         };
 
@@ -139,7 +164,7 @@ impl Layer {
             self.biases[node_out] -= self.cost_gradient_biases[node_out];
             
             for node_in in 0..self.num_nodes_in {
-                self.weights[node_in][node_out] -= self.cost_gradient_weights[node_in][node_out] * learn_rate;
+                *self.get_weight_mut(node_in, node_out) -= self.get_cost_gradient_weight(node_in, node_out) * learn_rate;
             };
         };
     }
@@ -150,16 +175,16 @@ impl Layer {
     pub fn activation(&self) -> Activation { self.activation }
     
     /* [GETTERS] Weights and biases */
-    pub fn weights(&self) -> &Vec<Vec<GlobalNNFloatType>> { &self.weights }
+    pub fn weights(&self) -> &Vec<GlobalNNFloatType> { &self.weights }
     pub fn biases(&self) -> &Vec<GlobalNNFloatType> { &self.biases }
-    pub fn weights_mut(&mut self) -> &mut Vec<Vec<GlobalNNFloatType>> { &mut self.weights }
+    pub fn weights_mut(&mut self) -> &mut Vec<GlobalNNFloatType> { &mut self.weights }
     pub fn biases_mut(&mut self) -> &mut Vec<GlobalNNFloatType> { &mut self.biases }
 
     /* [GETTERS] Cost gradient */
     pub fn cost_gradient_biases(&self) -> &Vec<GlobalNNFloatType> { &self.cost_gradient_biases }
-    pub fn cost_gradient_weights(&self) -> &Vec<Vec<GlobalNNFloatType>> { &self.cost_gradient_weights }
+    pub fn cost_gradient_weights(&self) -> &Vec<GlobalNNFloatType> { &self.cost_gradient_weights }
     pub fn cost_gradient_biases_mut(&mut self) -> &mut Vec<GlobalNNFloatType> { &mut self.cost_gradient_biases }
-    pub fn cost_gradient_weights_mut(&mut self) -> &mut Vec<Vec<GlobalNNFloatType>> { &mut self.cost_gradient_weights }
+    pub fn cost_gradient_weights_mut(&mut self) -> &mut Vec<GlobalNNFloatType> { &mut self.cost_gradient_weights }
 }
 
 /* Debug implementation */
@@ -180,7 +205,7 @@ impl Display for Layer {
 
             string.push_str(" weights:[");
             for node_in in 0..self.num_nodes_in {
-                string.push_str(&format!("{:.3}, ", self.weights[node_in][node_out]));
+                string.push_str(&format!("{:.3}, ", self.get_weight(node_in, node_out)));
             };
 
             string.push_str("]");
