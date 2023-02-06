@@ -108,6 +108,28 @@ impl Layer {
         activations
     }
 
+	// Calculate layer output activations and store inputs/weightedInputs/activations in the given learnData object
+	pub fn calculate_outputs_store(&self, inputs: Vec<GlobalNNFloatType>, learn_data: &mut LayerLearnData) -> Vec<GlobalNNFloatType> {
+		learn_data.inputs = inputs.clone();
+
+        for node_out in 0..self.num_nodes_out() {
+			let mut weighted_input = self.biases[node_out];
+
+			for node_in in 0..self.num_nodes_in() {
+				weighted_input += inputs[node_in] * self.get_weight(node_in, node_out);
+			}
+
+			learn_data.weighted_inputs[node_out] = weighted_input;
+		};
+
+		// Apply activation function
+		for i in 0..learn_data.activations.len() {
+			learn_data.activations[i] = self.activation()(&learn_data.weighted_inputs, i);
+		}
+
+		learn_data.activations.clone()
+	}
+
     /// Get a value from the `weights` "matrix"
 	pub fn get_weight(&self, node_in: usize, node_out: usize) -> f64 {
 		let flat_index = node_out * self.num_nodes_in() + node_in;
